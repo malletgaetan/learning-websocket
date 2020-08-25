@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font: 13px Helvetica, Arial; }
+      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+      form input { border: 0; padding: 10px; width: 90%; margin-right: 0.5%; }
+      form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+      #messages { list-style-type: none; margin: 0; padding: 0; }
+      #messages li { padding: 5px 10px; }
+      #messages li:nth-child(odd) { background: #eee; }
+    </style>
+  </head>
+  <body>
+    <ul id="messages"></ul>
+    <form action="">
+      <!-- <select name="channel" id="channel-select">
+        <option value="channel1">channel1</option>
+        <option value="channel2">channel2</option>
+        <option value="channel3">channel3</option>
+    </select> -->
+      <input id="m" autocomplete="off" /><button>Send</button>
+    </form>
+    <script src="socket.io/socket.io.js"></script>
+    <script>
+
+      const form = document.querySelector("form");
+      // const channelSelector = document.querySelector("#channel-select");
+      const username = Math.random().toString(36).substring(7);
+
+      let socket = io();
+      // let channel = channelSelector.value;
+
+      const appendChatMessage = (user, content) => {
+        const messageList = document.querySelector("ul");
+        messageList.insertAdjacentHTML("beforeend", `<li>${user} <small>said</small> ${content}</li>`);
+      }
+
+      const appendIOMessage = (user, connectionState) => {
+        const messageList = document.querySelector("ul");
+        const item = connectionState ? `<li>${user} joined</li>` : `<li>${user} left</li>`;
+        messageList.insertAdjacentHTML("beforeend", item);
+      }
+
+      // Js Events
+      window.addEventListener("DOMContentLoaded", () => socket.emit("add user", username));
+      
+      form.addEventListener("submit", e => {
+        e.preventDefault();
+        const input = form.querySelector("input");
+        socket.emit("chat message", {
+          user: username,
+          content: input.value
+        });
+        appendChatMessage("YOU", input.value);
+        input.value = "";
+      });
+
+      // Socket events
+      socket.on("new message", obj => appendChatMessage(obj.user, obj.content));
+      socket.on("user joined", user => appendIOMessage(user.username, true));
+      socket.on("user left", user => appendIOMessage(user.username, false));
+    </script>
+  </body>
+</html>
