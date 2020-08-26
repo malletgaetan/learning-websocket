@@ -16,6 +16,7 @@
   <body>
     <ul id="messages"></ul>
     <form action="">
+      <p style="color:white" id="areTyping"></p>
       <!-- <select name="channel" id="channel-select">
         <option value="channel1">channel1</option>
         <option value="channel2">channel2</option>
@@ -27,11 +28,14 @@
     <script>
 
       const form = document.querySelector("form");
-      // const channelSelector = document.querySelector("#channel-select");
+      const input = form.querySelector("input");
+      const typerElement = document.getElementById("areTyping");
+      let userTyping = [];
+      let timeout = null;
+
       const username = Math.random().toString(36).substring(7);
 
       let socket = io();
-      // let channel = channelSelector.value;
 
       const appendChatMessage = (user, content) => {
         const messageList = document.querySelector("ul");
@@ -44,12 +48,33 @@
         messageList.insertAdjacentHTML("beforeend", item);
       }
 
+      const renderTyper = () => {
+        
+        uTLength = userTyping.length;
+        
+        const typings = userTyping.map((e, i) => {
+          if(uTLength == 1) return `${e} is typing...`;
+          if(i ==  uTLength - 2) return `${e} and `;
+          if(i == uTLength - 1) return  `${e} are typing`;
+          if(i < uTLength - 2) return  `${e}, `;
+        }).join("");
+
+        typerElement.innerHTML = typings;
+      };
+
       // Js Events
       window.addEventListener("DOMContentLoaded", () => socket.emit("add user", username));
       
+      input.addEventListener("keyup", () => {
+        socket.emit("typing", username);
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+          socket.emit("stop typing");
+        }, 5000);
+      });
+
       form.addEventListener("submit", e => {
         e.preventDefault();
-        const input = form.querySelector("input");
         socket.emit("chat message", {
           user: username,
           content: input.value
@@ -62,6 +87,18 @@
       socket.on("new message", obj => appendChatMessage(obj.user, obj.content));
       socket.on("user joined", user => appendIOMessage(user.username, true));
       socket.on("user left", user => appendIOMessage(user.username, false));
+
+      socket.on("typing", username => {
+        if(!userTyping.includes(username)){
+          userTyping.push(username);
+          renderTyper();
+        }
+      });
+
+      socket.on("stop typing", username => {
+        userTyping = userTyping.length > 1 ? userTyping.splice(userTyping.indexOf(username), 1) : [];
+        renderTyper();
+      });
     </script>
   </body>
 </html>

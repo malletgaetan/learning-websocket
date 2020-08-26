@@ -9,18 +9,19 @@ app.get('/', (_, res) => {
 });
 
 io.on("connection", socket => {
-
-  console.log("connection");
-
   ++userCount;
+
+  socket.on("typing", username => {
+    socket.broadcast.emit("typing", username);
+  });
+
+  socket.on("stop typing", username => {
+    socket.broadcast.emit("stop typing", username);
+  });
 
   socket.on("add user", username => {
 
-    console.log("add user bif");
-
     if (addedUser) return;
-
-    console.log("adding ", username);
 
     socket.username = username;
     addedUser = true;
