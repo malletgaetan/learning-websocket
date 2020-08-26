@@ -50,6 +50,8 @@
 
       const renderTyper = () => {
         
+        console.log(userTyping);
+
         uTLength = userTyping.length;
         
         const typings = userTyping.map((e, i) => {
@@ -96,7 +98,7 @@
       });
 
       socket.on("stop typing", username => {
-        userTyping = userTyping.length > 1 ? userTyping.splice(userTyping.indexOf(username), 1) : [];
+        userTyping.splice(userTyping.indexOf(username), 1);
         renderTyper();
       });
     </script>
