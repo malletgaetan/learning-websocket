@@ -1,17 +1,27 @@
 let app = require('express')();
 let http = require('http').createServer(app);
 let io = require('socket.io')(http);
-let addedUser = false;
-let userCount = 0;
+let userList = [];
+let count = 0;
+let typingTimeout;
+
+const array2Json = arr => {
+  let json = {};
+  arr.forEach((e, i) => json[i] = e);
+  return json;
+}
 
 app.get('/', (_, res) => {
   res.sendFile(__dirname + "/index.html");
 });
 
 io.on("connection", socket => {
-  ++userCount;
+  let addedUser = false;
 
   socket.on("typing", username => {
+    typingTimeout = setTimeout(() => {
+      socket.broadcast.emit("")
+    });
     socket.broadcast.emit("typing", username);
   });
 
@@ -20,27 +30,24 @@ io.on("connection", socket => {
   });
 
   socket.on("add user", username => {
-
     if (addedUser) return;
-
+    count++;
     socket.username = username;
     addedUser = true;
-    ++userCount;
-
+    userList.push(socket.username);
     socket.broadcast.emit('user joined', {
       username: socket.username,
-      userCount: userCount
     });
   });
 
   socket.on("disconnect", username => {
     if(!addedUser) return;
 
-    --userCount;
+    userList.splice(userList.indexOf(socket.username), 1);
+    console.log(userList);
     addedUser = false;
     socket.broadcast.emit("user left", {
-      username: socket.username,
-      userCount: userCount
+      username: socket.username
     });
   });
 
@@ -48,6 +55,7 @@ io.on("connection", socket => {
     socket.broadcast.emit("new message", obj);
     console.log(JSON.stringify(obj, null, 4));
   });
+  console.log(userList);
 });
 
 http.listen(3000, () => {
