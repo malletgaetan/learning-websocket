@@ -18,25 +18,29 @@ app.get('/', (_, res) => {
 io.on("connection", socket => {
   let addedUser = false;
 
+  
   socket.on("typing", username => {
     typingTimeout = setTimeout(() => {
-      socket.broadcast.emit("")
-    });
+      socket.broadcast.emit("stop typing");
+    }, 5000);
     socket.broadcast.emit("typing", username);
   });
-
+  
   socket.on("stop typing", username => {
     socket.broadcast.emit("stop typing", username);
   });
-
+  
   socket.on("add user", username => {
     if (addedUser) return;
+    
     count++;
     socket.username = username;
     addedUser = true;
     userList.push(socket.username);
+    socket.emit("userlist", userList);
     socket.broadcast.emit('user joined', {
       username: socket.username,
+      userList: userList
     });
   });
 
@@ -44,16 +48,16 @@ io.on("connection", socket => {
     if(!addedUser) return;
 
     userList.splice(userList.indexOf(socket.username), 1);
-    console.log(userList);
     addedUser = false;
     socket.broadcast.emit("user left", {
-      username: socket.username
+      username: socket.username,
+      userList: userList
     });
   });
 
   socket.on("chat message", obj => {
     socket.broadcast.emit("new message", obj);
-    console.log(JSON.stringify(obj, null, 4));
+    // console.log(JSON.stringify(obj, null, 4));
   });
   console.log(userList);
 });

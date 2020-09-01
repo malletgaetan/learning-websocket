@@ -11,9 +11,11 @@
       #messages { list-style-type: none; margin: 0; padding: 0; }
       #messages li { padding: 5px 10px; }
       #messages li:nth-child(odd) { background: #eee; }
+      #user-list { list-style-type: none; margin: 0; padding: 0; }
     </style>
   </head>
   <body>
+    <ul id="user-list"></ul>
     <ul id="messages"></ul>
     <form action="">
       <p style="color:white" id="areTyping"></p>
@@ -30,8 +32,10 @@
       const form = document.querySelector("form");
       const input = form.querySelector("input");
       const typerElement = document.getElementById("areTyping");
+      const usersListElement = document.getElementById("user-list");
       let userTyping = [];
       let timeout = null;
+      let localUserList = [];
 
       const username = Math.random().toString(36).substring(7);
 
@@ -64,6 +68,11 @@
         typerElement.innerHTML = typings;
       };
 
+      const setUserList = userList => {
+        usersListElement.innerHTML = "";
+        usersListElement.innerHTML = userList.map(e => `<li>${e}</li>`).join('');
+      };
+
       // Js Events
       window.addEventListener("DOMContentLoaded", () => socket.emit("add user", username));
       
@@ -87,8 +96,18 @@
 
       // Socket events
       socket.on("new message", obj => appendChatMessage(obj.user, obj.content));
-      socket.on("user joined", user => appendIOMessage(user.username, true));
-      socket.on("user left", user => appendIOMessage(user.username, false));
+      
+      socket.on("user joined", income => {
+        appendIOMessage(income.username, true);
+        setUserList(income.userList);
+      });
+
+      socket.on("user left", income => {
+        appendIOMessage(income.username, false);
+        setUserList(income.userList);
+      });
+
+      socket.on("userlist", userList => setUserList(userList));
 
       socket.on("typing", username => {
         if(!userTyping.includes(username)){
