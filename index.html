@@ -34,7 +34,6 @@
       const typerElement = document.getElementById("areTyping");
       const usersListElement = document.getElementById("user-list");
       let userTyping = [];
-      let timeout = null;
       let localUserList = [];
 
       const username = Math.random().toString(36).substring(7);
@@ -78,10 +77,6 @@
       
       input.addEventListener("keyup", () => {
         socket.emit("typing", username);
-        clearTimeout(timeout);
-        timeout = setTimeout(() => {
-          socket.emit("stop typing");
-        }, 5000);
       });
 
       form.addEventListener("submit", e => {
@@ -96,7 +91,7 @@
 
       // Socket events
       socket.on("new message", obj => appendChatMessage(obj.user, obj.content));
-      
+
       socket.on("user joined", income => {
         appendIOMessage(income.username, true);
         setUserList(income.userList);
@@ -117,6 +112,7 @@
       });
 
       socket.on("stop typing", username => {
+        console.log(username);
         userTyping.splice(userTyping.indexOf(username), 1);
         renderTyper();
       });

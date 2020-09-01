@@ -3,7 +3,6 @@ let http = require('http').createServer(app);
 let io = require('socket.io')(http);
 let userList = [];
 let count = 0;
-let typingTimeout;
 
 const array2Json = arr => {
   let json = {};
@@ -20,14 +19,11 @@ io.on("connection", socket => {
 
   
   socket.on("typing", username => {
-    typingTimeout = setTimeout(() => {
-      socket.broadcast.emit("stop typing");
+    clearTimeout(socket.timeout)
+    socket.timeout = setTimeout(() => {
+      socket.broadcast.emit("stop typing", username);
     }, 5000);
     socket.broadcast.emit("typing", username);
-  });
-  
-  socket.on("stop typing", username => {
-    socket.broadcast.emit("stop typing", username);
   });
   
   socket.on("add user", username => {
