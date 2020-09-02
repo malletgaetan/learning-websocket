@@ -1,10 +1,10 @@
-let app = require('express')();
-let http = require('http').createServer(app);
-let io = require('socket.io')(http);
+let app = require("express")();
+let http = require("http").createServer(app);
+let io = require("socket.io")(http);
 let addedUser = false;
 let userCount = 0;
 
-app.get('/', (_, res) => {
+app.get("/", (_, res) => {
   res.sendFile(__dirname + "/index.html");
 });
 
@@ -27,7 +27,7 @@ io.on("connection", socket => {
     addedUser = true;
     ++userCount;
 
-    socket.broadcast.emit('user joined', {
+    socket.broadcast.emit("user joined", {
       username: socket.username,
       userCount: userCount
     });
@@ -51,5 +51,5 @@ io.on("connection", socket => {
 });
 
 http.listen(3000, () => {
-  console.log('listening on *:3000');
+  console.log("listening on *:3000");
 });
