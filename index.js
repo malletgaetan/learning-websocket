@@ -30,7 +30,6 @@ io.on("connection", socket => {
   
   socket.on("private message", infos => {
     const target = userIdList.get(infos.to);
-    console.log(infos);
     io.to(target).emit("private message", infos);
   });
 
@@ -65,7 +64,6 @@ io.on("connection", socket => {
     socket.broadcast.emit("new message", obj);
     // console.log(JSON.stringify(obj, null, 4));
   });
-  console.log(userList);
 });
 
 http.listen(3000, () => {
