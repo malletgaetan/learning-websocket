@@ -67,7 +67,12 @@
         typerElement.innerHTML = typings;
       };
 
+      const changeTarget = e => {
+        
+      }
+
       const setUserList = userList => {
+        localUserList = userList;
         usersListElement.innerHTML = "";
         usersListElement.innerHTML = userList.map(e => `<li>${e}</li>`).join('');
       };
@@ -75,9 +80,21 @@
       // Js Events
       window.addEventListener("DOMContentLoaded", () => socket.emit("add user", username));
       
+      document.querySelector("#user-list").addEventListener("click", () => {
+        const infos = { 
+          from: localUserList[0],
+          to:localUserList[1],
+          message: "HEY SALUT C'EST LE PREMIER MESSAGE PRIVE HAHA"
+        };
+        console.log(localUserList);
+        socket.emit("private message", infos);
+        console.log("EMIIIT");
+      });
+
       input.addEventListener("keyup", () => {
         socket.emit("typing", username);
       });
+
 
       form.addEventListener("submit", e => {
         e.preventDefault();
@@ -116,6 +133,8 @@
         userTyping.splice(userTyping.indexOf(username), 1);
         renderTyper();
       });
+
+      socket.on("private message", obj => console.log(obj));
     </script>
   </body>
 </html>
