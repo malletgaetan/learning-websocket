@@ -1,6 +1,6 @@
 # Socket.io learning project
 
-Simple chat application that follow the GetStarted socket.io page and do the HomeWorks:
+Simple chat application that follow the getStarted guide and go further with the homeworks.
 
 ## Homework
   Here are some ideas to improve the application:
