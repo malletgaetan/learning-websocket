@@ -42,13 +42,23 @@
       const appendChatMessage = (user, content) => {
         const messageList = document.querySelector("ul");
         messageList.insertAdjacentHTML("beforeend", `<li>${user} <small>said</small> ${content}</li>`);
-      }
+      };
 
       const appendIOMessage = (user, connectionState) => {
         const messageList = document.querySelector("ul");
         const item = connectionState ? `<li>${user} joined</li>` : `<li>${user} left</li>`;
         messageList.insertAdjacentHTML("beforeend", item);
-      }
+      };
+
+      const appendPrivateMessage = (user, content) => {
+        const messageList = document.querySelector("ul");
+        messageList.insertAdjacentHTML("beforeend", `<li>${user} <small>whispered</small> ${content}</li>`);
+      };
+
+      const appendErrorMessage = err => {
+        const messageList = document.querySelector("ul");
+        messageList.insertAdjacentHTML("beforeend", `<li>${err}</li>`)
+      };
 
       const renderTyper = () => {
         
@@ -68,24 +78,39 @@
       };
 
       const setUserList = userList => {
+        localUserList = userList;
         usersListElement.innerHTML = "";
         usersListElement.innerHTML = userList.map(e => `<li>${e}</li>`).join('');
       };
 
       // Js Events
       window.addEventListener("DOMContentLoaded", () => socket.emit("add user", username));
-      
+
       input.addEventListener("keyup", () => {
         socket.emit("typing", username);
       });
 
       form.addEventListener("submit", e => {
         e.preventDefault();
-        socket.emit("chat message", {
-          user: username,
-          content: input.value
-        });
-        appendChatMessage("YOU", input.value);
+        const message = input.value;
+        if(message.startsWith('/w ')){
+          const destruct = message.split(" ");
+          if(localUserList.includes(destruct[1])){
+            socket.emit("private message", {
+              from: username,
+              to: destruct[1],
+              message: destruct.slice(2, destruct.length).join(" ")
+            });
+          } else {
+            appendErrorMessage("Sorry but this pseudo doesn't exist.");
+          }
+        } else {
+          socket.emit("chat message", {
+            user: username,
+            content: input.value
+          });
+          appendChatMessage("YOU", input.value);
+        }
         input.value = "";
       });
 
@@ -116,6 +141,8 @@
         userTyping.splice(userTyping.indexOf(username), 1);
         renderTyper();
       });
+
+      socket.on("private message", obj => appendPrivateMessage(obj.from, obj.message));
     </script>
   </body>
 </html>

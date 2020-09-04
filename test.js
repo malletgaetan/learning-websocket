@@ -1,76 +1,185 @@
-// Setup basic express server
-var express = require('express');
-var app = express();
-var path = require('path');
-var server = require('http').createServer(app);
-var io = require('socket.io')(server);
-var port = process.env.PORT || 3000;
-
-server.listen(port, () => {
-  console.log('Server listening at port %d', port);
-});
-
-// Routing
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Chatroom
-
-var numUsers = 0;
-
-io.on('connection', (socket) => {
-  var addedUser = false;
-
-  // when the client emits 'new message', this listens and executes
-  socket.on('new message', (data) => {
-    // we tell the client to execute 'new message'
-    socket.broadcast.emit('new message', {
-      username: socket.username,
-      message: data
-    });
-  });
-
-  // when the client emits 'add user', this listens and executes
-  socket.on('add user', (username) => {
-    if (addedUser) return;
-
-    // we store the username in the socket session for this client
-    socket.username = username;
-    ++numUsers;
-    addedUser = true;
-    socket.emit('login', {
-      numUsers: numUsers
-    });
-    // echo globally (all clients) that a person has connected
-    socket.broadcast.emit('user joined', {
-      username: socket.username,
-      numUsers: numUsers
-    });
-  });
-
-  // when the client emits 'typing', we broadcast it to others
-  socket.on('typing', () => {
-    socket.broadcast.emit('typing', {
-      username: socket.username
-    });
-  });
-
-  // when the client emits 'stop typing', we broadcast it to others
-  socket.on('stop typing', () => {
-    socket.broadcast.emit('stop typing', {
-      username: socket.username
-    });
-  });
-
-  // when the user disconnects.. perform this
-  socket.on('disconnect', () => {
-    if (addedUser) {
-      --numUsers;
-
-      // echo globally that this client has left
-      socket.broadcast.emit('user left', {
-        username: socket.username,
-        numUsers: numUsers
-      });
-    }
-  });
-});
+{
+  Namespace {
+    name: '/',
+    server: Server {
+      nsps: { '/': [Circular] },
+      parentNsps: Map {},
+      _path: '/socket.io',
+      _serveClient: true,
+      parser: {
+        protocol: 4,
+        types: [Array],
+        CONNECT: 0,
+        DISCONNECT: 1,
+        EVENT: 2,
+        ACK: 3,
+        ERROR: 4,
+        BINARY_EVENT: 5,
+        BINARY_ACK: 6,
+        Encoder: [Function: Encoder],
+        Decoder: [Function: Decoder]
+      },
+      encoder: Encoder {},
+      _adapter: [Function: Adapter],
+      _origins: '*:*',
+      sockets: [Circular],
+      eio: Server {
+        clients: [Object],
+        clientsCount: 2,
+        wsEngine: 'ws',
+        pingTimeout: 5000,
+        pingInterval: 25000,
+        upgradeTimeout: 10000,
+        maxHttpBufferSize: 100000000,
+        transports: [Array],
+        allowUpgrades: true,
+        allowRequest: [Function: bound ],
+        cookie: 'io',
+        cookiePath: '/',
+        cookieHttpOnly: true,
+        perMessageDeflate: [Object],
+        httpCompression: [Object],
+        initialPacket: [Array],
+        ws: [WebSocketServer],
+        _events: [Object: null prototype],
+        _eventsCount: 1
+      },
+      httpServer: Server {
+        insecureHTTPParser: undefined,
+        _events: [Object: null prototype],
+        _eventsCount: 5,
+        _maxListeners: undefined,
+        _connections: 3,
+        _handle: [TCP],
+        _usingWorkers: false,
+        _workers: [],
+        _unref: false,
+        allowHalfOpen: true,
+        pauseOnConnect: false,
+        httpAllowHalfOpen: false,
+        timeout: 120000,
+        keepAliveTimeout: 5000,
+        maxHeadersCount: null,
+        headersTimeout: 40000,
+        _connectionKey: '6::::3000',
+        [Symbol(IncomingMessage)]: [Function: IncomingMessage],
+        [Symbol(ServerResponse)]: [Function: ServerResponse],
+        [Symbol(kCapture)]: false,
+        [Symbol(asyncId)]: 5
+      },
+      engine: Server {
+        clients: [Object],
+        clientsCount: 2,
+        wsEngine: 'ws',
+        pingTimeout: 5000,
+        pingInterval: 25000,
+        upgradeTimeout: 10000,
+        maxHttpBufferSize: 100000000,
+        transports: [Array],
+        allowUpgrades: true,
+        allowRequest: [Function: bound ],
+        cookie: 'io',
+        cookiePath: '/',
+        cookieHttpOnly: true,
+        perMessageDeflate: [Object],
+        httpCompression: [Object],
+        initialPacket: [Array],
+        ws: [WebSocketServer],
+        _events: [Object: null prototype],
+        _eventsCount: 1
+      }
+    },
+    sockets: {
+      uaf5XmJIB7d1cpw8AAAC: Socket {
+        nsp: [Circular],
+        server: [Server],
+        adapter: [Adapter],
+        id: 'uaf5XmJIB7d1cpw8AAAC',
+        client: [Client],
+        conn: [Socket],
+        rooms: [Object],
+        acks: {},
+        connected: true,
+        disconnected: false,
+        handshake: [Object],
+        fns: [],
+        flags: {},
+        _rooms: [],
+        _events: [Object: null prototype],
+        _eventsCount: 5,
+        username: 'wxh5ua'
+      },
+      IgIO4KjFfCTJG35qAAAD: Socket {
+        nsp: [Circular],
+        server: [Server],
+        adapter: [Adapter],
+        id: 'IgIO4KjFfCTJG35qAAAD',
+        client: [Client],
+        conn: [Socket],
+        rooms: [Object],
+        acks: {},
+        connected: true,
+        disconnected: false,
+        handshake: [Object],
+        fns: [],
+        flags: {},
+        _rooms: [],
+        _events: [Object: null prototype],
+        _eventsCount: 5,
+        username: '2c9cfo'
+      }
+    },
+    connected: {
+      uaf5XmJIB7d1cpw8AAAC: Socket {
+        nsp: [Circular],
+        server: [Server],
+        adapter: [Adapter],
+        id: 'uaf5XmJIB7d1cpw8AAAC',
+        client: [Client],
+        conn: [Socket],
+        rooms: [Object],
+        acks: {},
+        connected: true,
+        disconnected: false,
+        handshake: [Object],
+        fns: [],
+        flags: {},
+        _rooms: [],
+        _events: [Object: null prototype],
+        _eventsCount: 5,
+        username: 'wxh5ua'
+      },
+      IgIO4KjFfCTJG35qAAAD: Socket {
+        nsp: [Circular],
+        server: [Server],
+        adapter: [Adapter],
+        id: 'IgIO4KjFfCTJG35qAAAD',
+        client: [Client],
+        conn: [Socket],
+        rooms: [Object],
+        acks: {},
+        connected: true,
+        disconnected: false,
+        handshake: [Object],
+        fns: [],
+        flags: {},
+        _rooms: [],
+        _events: [Object: null prototype],
+        _eventsCount: 5,
+        username: '2c9cfo'
+      }
+    },
+    fns: [],
+    ids: 0,
+    rooms: [],
+    flags: {},
+    adapter: Adapter {
+      nsp: [Circular],
+      rooms: { uaf5XmJIB7d1cpw8AAAC: [Room], IgIO4KjFfCTJG35qAAAD: [Room] },
+      sids: { uaf5XmJIB7d1cpw8AAAC: [Object], IgIO4KjFfCTJG35qAAAD: [Object] },
+      encoder: Encoder {}
+    },
+    _events: [Object: null prototype] { connection: [Function] },
+    _eventsCount: 1
+  }
+}

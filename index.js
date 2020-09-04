@@ -3,6 +3,7 @@ let app = require('express')();
 let http = require('http').createServer(app);
 let io = require('socket.io')(http);
 let userList = [];
+let userIdList = new Map();
 let count = 0;
 
 const array2Json = arr => {
@@ -27,6 +28,11 @@ io.on("connection", socket => {
     socket.broadcast.emit("typing", username);
   });
   
+  socket.on("private message", infos => {
+    const target = userIdList.get(infos.to);
+    io.to(target).emit("private message", infos);
+  });
+
   socket.on("add user", username => {
     if (addedUser) return;
     
@@ -34,6 +40,7 @@ io.on("connection", socket => {
     socket.username = username;
     addedUser = true;
     userList.push(socket.username);
+    userIdList.set(socket.username, socket.id);
     socket.emit("userlist", userList);
     socket.broadcast.emit('user joined', {
       username: socket.username,
@@ -45,6 +52,7 @@ io.on("connection", socket => {
     if(!addedUser) return;
 
     userList.splice(userList.indexOf(socket.username), 1);
+    userIdList.delete(socket.username);
     addedUser = false;
     socket.broadcast.emit("user left", {
       username: socket.username,
@@ -56,7 +64,6 @@ io.on("connection", socket => {
     socket.broadcast.emit("new message", obj);
     // console.log(JSON.stringify(obj, null, 4));
   });
-  console.log(userList);
 });
 
 http.listen(3000, () => {
